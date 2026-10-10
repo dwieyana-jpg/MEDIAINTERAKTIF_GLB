@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Media Pembelajaran Interaktif - GLB</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { overflow-x: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    min-height: 100vh;
+    color: #333;
+    padding: 10px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .app {
+    max-width: 950px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    overflow: hidden;
+  }
+  header {
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: #fff;
+    padding: 16px 14px;
+    text-align: center;
+  }
+  header h1 { font-size: 1.15rem; letter-spacing: 0.5px; line-height: 1.3; }
+  header p { font-size: 0.78rem; opacity: 0.85; margin-top: 4px; }
+
+  /* NAV: horizontal scroll di mobile */
+  nav {
+    display: flex;
+    background: #eef2f7;
+    border-bottom: 3px solid #2c5364;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  nav::-webkit-scrollbar { height: 4px; }
+  nav::-webkit-scrollbar-thumb { background: #2c5364; border-radius: 4px; }
+  nav button {
+    flex: 0 0 auto;
+    padding: 12px 14px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2c5364;
+    transition: 0.25s;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+  }
+  nav button.active {
+    background: #2c5364;
+    color: #fff;
+    border-bottom: 3px solid #ffb703;
+  }
+
+  main { padding: 16px; }
+  .section { display: none; animation: fade 0.4s ease; }
+  .section.active { display: block; }
+  @keyframes fade { from { opacity: 0; transform: translateY(8px);} to {opacity:1; transform: translateY(0);} }
+
+  h2 { color: #1e3c72; margin-bottom: 12px; border-left: 5px solid #ffb703; padding-left: 10px; font-size: 1.15rem; }
+  h3 { color: #2c5364; margin: 16px 0 8px; font-size: 1rem; }
+  p, li { color: #444; font-size: 0.92rem; }
+  ul, ol { margin-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+
+  .card {
+    background: #f7fafd;
+    border: 1px solid #d9e3ee;
+    border-radius: 12px;
+    padding: 14px;
+    margin: 12px 0;
+  }
+
+  .rumus {
+    background: #0f2027;
+    color: #ffb703;
+    font-size: 1.05rem;
+    text-align: center;
+    padding: 14px 8px;
+    border-radius: 12px;
+    font-family: 'Cambria Math', serif;
+    margin: 12px 0;
+    letter-spacing: 0.5px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .simbol-table { width: 100%; min-width: 340px; border-collapse: collapse; margin-top: 10px; }
+  .simbol-table th, .simbol-table td {
+    border: 1px solid #cbd6e2; padding: 8px 10px; text-align: left; font-size: 0.85rem;
+  }
+  .simbol-table th { background: #2c5364; color: #fff; }
+  .simbol-table tr:nth-child(even) { background: #eef4fa; }
+
+  /* LAB */
+  .lab-area {
+    position: relative;
+    height: 110px;
+    background: linear-gradient(to bottom, #cfe8ff, #e8f4ff);
+    border-radius: 12px;
+    margin: 14px 0;
+    overflow: hidden;
+    border: 2px solid #90b8d8;
+  }
+  .road {
+    position: absolute; bottom: 22px; left: 0; right: 0; height: 5px;
+    background: repeating-linear-gradient(to right, #888 0 25px, transparent 25px 42px);
+  }
+  .mobil {
+  position: absolute; bottom: 26px; left: 4px;
+  font-size: 28px;
+  line-height: 1;
+  will-change: left;
+  transform: scaleX(-1); /* ✅ balik arah biar hadap kanan */
+}
+  .marker {
+    position: absolute; bottom: 0; width: 1px; height: 100%;
+    background: rgba(200,0,0,0.22);
+  }
+  .marker span {
+    position: absolute; bottom: 2px; left: -8px; font-size: 0.65rem; color: #b00; font-weight: 700;
+  }
+
+  .controls { display: grid; grid-template-columns: 1fr; gap: 12px; }
+  .slider-box label { font-weight: 600; font-size: 0.85rem; display: block; margin-bottom: 6px; color: #2c5364; }
+  input[type=range] {
+    width: 100%;
+    accent-color: #ffb703;
+    height: 32px;
+    cursor: pointer;
+  }
+  .val { font-weight: 700; color: #b00; }
+
+  .btns { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+  button.action {
+    background: #2c5364; color: #fff; border: none; padding: 12px 18px;
+    border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;
+    font-size: 0.88rem;
+    flex: 1 1 auto;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+  button.action:active { transform: scale(0.97); }
+  button.action.green { background: #1b8a5a; }
+  button.action.red { background: #b03030; }
+
+  .hasil-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .hasil-item {
+    background: #fff; border: 2px solid #ffb703; border-radius: 10px;
+    padding: 10px 6px; text-align: center;
+  }
+  .hasil-item .label { font-size: 0.7rem; color: #666; }
+  .hasil-item .value { font-size: 1.05rem; font-weight: 800; color: #0f2027; margin-top: 2px; }
+
+  .canvas-wrap {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 10px;
+    border: 1px solid #cbd6e2;
+    background: #fff;
+    margin-top: 12px;
+  }
+  canvas { display: block; width: 100%; }
+
+  .soal {
+    background: #f7fafd; border: 1px solid #d9e3ee; border-radius: 12px;
+    padding: 14px; margin-bottom: 12px;
+  }
+  .soal .pertanyaan { font-weight: 600; margin-bottom: 10px; font-size: 0.92rem; }
+  .opsi { margin: 4px 0; }
+  .opsi label {
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    padding: 10px; border-radius: 8px; transition: 0.15s;
+    font-size: 0.88rem;
+    min-height: 44px;
+    border: 1.5px solid transparent;
+  }
+  .opsi label:hover { background: #e3eef9; }
+  .opsi input { margin: 0; flex-shrink: 0; width: 18px; height: 18px; accent-color: #2c5364; }
+
+  .petunjuk-btn {
+    background: #ffb703; color: #0f2027; border: none; padding: 8px 14px;
+    border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: 700;
+    margin-top: 6px; min-height: 36px;
+  }
+  .petunjuk {
+    display: none; margin-top: 8px; padding: 10px; background: #fff8e1;
+    border-left: 4px solid #ffb703; border-radius: 6px; font-size: 0.85rem;
+  }
+  .feedback {
+    margin-top: 10px; padding: 10px; border-radius: 6px; font-size: 0.85rem; display: none;
+  }
+  .feedback.benar { background: #d9f4e3; border-left: 4px solid #1b8a5a; color: #146c46; }
+  .feedback.salah { background: #fde0e0; border-left: 4px solid #b03030; color: #8c2323; }
+  .feedback b { display: block; margin-bottom: 4px; }
+
+  .progress-bar {
+    height: 10px; background: #e0e8f0; border-radius: 8px; overflow: hidden; margin: 10px 0 16px;
+  }
+  .progress-bar div {
+    height: 100%; background: linear-gradient(90deg, #ffb703, #1b8a5a);
+    width: 0%; transition: width 0.4s;
+  }
+  .indikator-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 12px 0;
+  }
+  .indikator {
+    padding: 7px 8px; border-radius: 8px; font-size: 0.72rem; font-weight: 600;
+    background: #eef2f7; border-left: 4px solid #bbb;
+    line-height: 1.3;
+  }
+  .indikator.done { background: #d9f4e3; border-left-color: #1b8a5a; color: #146c46; }
+  .indikator.pending { background: #fde0e0; border-left-color: #b03030; color: #8c2323; }
+
+  .skor-box { text-align: center; padding: 20px 12px; }
+  .skor-box .big { font-size: 3rem; font-weight: 900; color: #1b8a5a; line-height: 1; }
+  .skor-box .big.buruk { color: #b03030; }
+  .skor-box .big.cukup { color: #d68a00; }
+
+  .contoh-step {
+    background: #fff; border: 1px dashed #2c5364; border-radius: 10px; padding: 12px; margin: 10px 0;
+  }
+  .contoh-step .step-title { font-weight: 700; color: #1e3c72; margin-bottom: 6px; font-size: 0.9rem; }
+  .contoh-step p { font-size: 0.87rem; margin-bottom: 4px; }
+
+  @media (min-width: 600px) {
+    body { padding: 20px; }
+    header h1 { font-size: 1.5rem; }
+    header p { font-size: 0.9rem; }
+    nav { flex-wrap: wrap; overflow-x: visible; }
+    nav button { flex: 1; min-width: 100px; font-size: 0.82rem; padding: 13px 8px; }
+    main { padding: 26px; }
+    h2 { font-size: 1.4rem; }
+    .controls { grid-template-columns: 1fr 1fr; }
+    .hasil-grid { grid-template-columns: repeat(4, 1fr); }
+    .indikator-grid { grid-template-columns: repeat(3, 1fr); }
+    .lab-area { height: 130px; }
+    .mobil { font-size: 34px; bottom: 30px; }
+    .skor-box .big { font-size: 4rem; }
+  }
+
+  @media (min-width: 900px) {
+    .indikator-grid { grid-template-columns: repeat(6, 1fr); }
+  }
+
+  @media (max-width: 480px) {
+    input, button, select, textarea { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>🚗 Media Pembelajaran Interaktif GLB</h1>
+    <p>Gerak Lurus Beraturan — Fisika Kelas X</p>
+  </header>
+
+  <nav id="nav">
+    <button data-target="beranda" class="active">🏠 Beranda</button>
+    <button data-target="petunjuk">📖 Petunjuk</button>
+    <button data-target="tujuan">🎯 Tujuan</button>
+    <button data-target="pemantik">💡 Pemantik</button>
+    <button data-target="materi">📚 Materi</button>
+    <button data-target="lab">🧪 Lab</button>
+    <button data-target="latihan">✏️ Latihan</button>
+    <button data-target="evaluasi">📝 Evaluasi</button>
+    <button data-target="hasil">🏆 Hasil</button>
+  </nav>
+
+  <main>
+    <!-- BERANDA -->
+    <section id="beranda" class="section active">
+      <h2>Selamat Datang!</h2>
+      <div class="card">
+        <p>Media pembelajaran interaktif ini membahas <b>Gerak Lurus Beraturan (GLB)</b>. Di sini kamu dapat mempelajari konsep, mencoba simulasi virtual, mengerjakan latihan, dan mengevaluasi pemahamanmu.</p>
+        <p style="margin-top:10px;">Gunakan menu navigasi di atas untuk berpindah antar bagian. Disarankan mengikuti urutan dari kiri ke kanan agar pemahamanmu terbangun secara bertahap. 🚀</p>
+      </div>
+      <div class="card">
+        <h3>Fitur Media</h3>
+        <ul>
+          <li>📚 Materi konsep + rumus + contoh soal bertahap</li>
+          <li>🧪 Lab virtual dengan slider kecepatan & waktu</li>
+          <li>📈 Grafik posisi–waktu dan kecepatan–waktu otomatis</li>
+          <li>✏️ Latihan dengan petunjuk & umpan balik penjelas</li>
+          <li>📝 Evaluasi dengan indikator ketercapaian</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- PETUNJUK -->
+    <section id="petunjuk" class="section">
+      <h2>Petunjuk Penggunaan</h2>
+      <div class="card">
+        <ol>
+          <li><b>Navigasi:</b> Tap tombol menu di atas (bisa digeser ke samping di HP).</li>
+          <li><b>Materi:</b> Baca konsep, pahami rumus & simbol, pelajari contoh soal bertahap.</li>
+          <li><b>Lab Virtual:</b> Geser slider <i>kecepatan</i> & <i>waktu</i>, lalu tekan <b>Jalankan</b>.</li>
+          <li><b>Latihan:</b> Pilih jawaban → <b>Cek Jawaban</b>. Tombol <b>Petunjuk</b> untuk bantuan.</li>
+          <li><b>Evaluasi:</b> Kerjakan semua soal. Indikator nomor berubah hijau jika dijawab.</li>
+          <li><b>Hasil:</b> Lihat skor, indikator, dan pembahasan.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- TUJUAN -->
+    <section id="tujuan" class="section">
+      <h2>Tujuan Pembelajaran</h2>
+      <div class="card">
+        <p>Setelah mengikuti pembelajaran ini, peserta didik diharapkan mampu:</p>
+        <ol>
+          <li><b>TP1:</b> Menjelaskan konsep GLB dan ciri-cirinya.</li>
+          <li><b>TP2:</b> Menuliskan persamaan GLB serta mengartikan setiap simbol dan satuannya.</li>
+          <li><b>TP3:</b> Menghitung besaran (jarak, kecepatan, atau waktu) pada GLB.</li>
+          <li><b>TP4:</b> Menganalisis grafik posisi–waktu dan kecepatan–waktu pada GLB.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- PEMANTIK -->
+    <section id="pemantik" class="section">
+      <h2>Pemantik</h2>
+      <div class="card">
+        <p>🤔 <b>Pernahkah kamu naik mobil di jalan tol yang lurus dan sepi?</b></p>
+        <p>Ketika pengemudi menekan gas secara stabil, jarum speedometer menunjukkan angka yang <i>tetap</i>, misalnya 80 km/jam. Mobil bergerak lurus tanpa berbelok, dan kecepatannya tidak berubah.</p>
+        <p style="margin-top:10px;">❓ <b>Pertanyaan pemantik:</b></p>
+        <ul>
+          <li>Jika kecepatan mobil tetap 80 km/jam, berapa jarak setelah 2 jam?</li>
+          <li>Apa hubungan antara jarak, kecepatan, dan waktu?</li>
+          <li>Bagaimana bentuk grafik kecepatan terhadap waktu jika konstan?</li>
+        </ul>
+        <p style="margin-top:10px;">Diskusikan bersama temanmu, lalu pelajari materi berikut! 💪</p>
+      </div>
+    </section>
+
+    <!-- MATERI -->
+    <section id="materi" class="section">
+      <h2>Materi: Gerak Lurus Beraturan</h2>
+
+      <h3>1. Konsep Singkat</h3>
+      <div class="card">
+        <p><b>Gerak Lurus Beraturan (GLB)</b> adalah gerak benda pada lintasan lurus dengan <b>kecepatan tetap (konstan)</b>. Artinya, besar dan arah kecepatan tidak berubah, sehingga percepatannya nol (a = 0).</p>
+        <p style="margin-top:8px;"><b>Ciri-ciri GLB:</b></p>
+        <ul>
+          <li>Lintasan berupa garis lurus.</li>
+          <li>Kecepatan tetap (v = konstan).</li>
+          <li>Percepatan nol (a = 0).</li>
+          <li>Jarak yang ditempuh sebanding dengan waktu (s ∝ t).</li>
+        </ul>
+      </div>
+
+      <h3>2. Rumus dan Arti Simbol</h3>
+      <div class="rumus">v = s/t &nbsp;⟺&nbsp; s = v·t &nbsp;⟺&nbsp; t = s/v</div>
+      <div class="table-wrap">
+        <table class="simbol-table">
+          <tr><th>Simbol</th><th>Besaran</th><th>Satuan SI</th></tr>
+          <tr><td><b>s</b></td><td>Jarak / perpindahan</td><td>meter (m)</td></tr>
+          <tr><td><b>v</b></td><td>Kecepatan</td><td>meter/sekon (m/s)</td></tr>
+          <tr><td><b>t</b></td><td>Waktu</td><td>sekon (s)</td></tr>
+        </table>
+      </div>
+      <p style="margin-top:10px; font-size:0.85rem;"><i>Catatan:</i> 1 km/jam = 1/3,6 m/s ≈ 0,278 m/s. Untuk mengubah km/jam → m/s, bagi dengan 3,6.</p>
+
+      <h3>3. Ilustrasi</h3>
+      <div class="lab-area" style="height:100px;">
+        <div class="road"></div>
+        <div class="mobil" style="left:14px;">🚗</div>
+        <div class="marker" style="left:30%;"><span>s₁</span></div>
+        <div class="marker" style="left:60%;"><span>s₂</span></div>
+        <div class="marker" style="left:90%;"><span>s₃</span></div>
+      </div>
+      <p style="text-align:center; font-size:0.85rem;">Mobil bergerak lurus dengan kecepatan tetap. Jarak antar titik sama dalam selang waktu yang sama.</p>
+
+      <h3>4. Contoh Soal Bertahap</h3>
+      <div class="contoh-step">
+        <div class="step-title">Contoh 1 (Mencari jarak)</div>
+        <p>Sebuah mobil bergerak GLB dengan kecepatan 20 m/s selama 5 sekon. Berapa jarak yang ditempuh?</p>
+        <p><b>Langkah 1 — Identifikasi:</b> v = 20 m/s, t = 5 s, ditanya s.</p>
+        <p><b>Langkah 2 — Pilih rumus:</b> s = v · t</p>
+        <p><b>Langkah 3 — Substitusi:</b> s = 20 × 5 = <b>100 m</b> ✅</p>
+      </div>
+      <div class="contoh-step">
+        <div class="step-title">Contoh 2 (Mencari kecepatan)</div>
+        <p>Seorang pelari menempuh 120 m dalam 15 sekon. Berapa kecepatannya?</p>
+        <p><b>Langkah 1 — Identifikasi:</b> s = 120 m, t = 15 s, ditanya v.</p>
+        <p><b>Langkah 2 — Pilih rumus:</b> v = s / t</p>
+        <p><b>Langkah 3 — Substitusi:</b> v = 120 / 15 = <b>8 m/s</b> ✅</p>
+      </div>
+      <div class="contoh-step">
+        <div class="step-title">Contoh 3 (Mencari waktu, dengan konversi)</div>
+        <p>Sebuah bus melaju dengan kecepatan 72 km/jam. Berapa waktu yang dibutuhkan untuk menempuh jarak 400 m?</p>
+        <p><b>Langkah 1 — Konversi:</b> v = 72 km/jam ÷ 3,6 = 20 m/s</p>
+        <p><b>Langkah 2 — Identifikasi:</b> s = 400 m, v = 20 m/s, ditanya t.</p>
+        <p><b>Langkah 3 — Pilih rumus:</b> t = s / v</p>
+        <p><b>Langkah 4 — Substitusi:</b> t = 400 / 20 = <b>20 s</b> ✅</p>
+      </div>
+    </section>
+
+    <!-- LAB VIRTUAL -->
+    <section id="lab" class="section">
+      <h2>Lab Virtual GLB</h2>
+      <p>Geser slider <b>kecepatan</b> & <b>waktu</b>, lalu tekan <b>Jalankan</b>. Amati mobil, hasil pengukuran, dan grafik yang berubah otomatis.</p>
+
+      <div class="lab-area" id="labArea">
+        <div class="road"></div>
+        <div class="mobil" id="mobil">🚗</div>
+        <div class="marker" style="left:0%;"><span>0</span></div>
+        <div class="marker" style="left:25%;"></div>
+        <div class="marker" style="left:50%;"></div>
+        <div class="marker" style="left:75%;"></div>
+        <div class="marker" style="left:100%;"></div>
+      </div>
+
+      <div class="controls">
+        <div class="slider-box">
+          <label>Kecepatan (v): <span class="val" id="vVal">10</span> m/s</label>
+          <input type="range" id="vSlider" min="1" max="30" value="10" step="1">
+        </div>
+        <div class="slider-box">
+          <label>Waktu (t): <span class="val" id="tVal">5</span> s</label>
+          <input type="range" id="tSlider" min="1" max="20" value="5" step="1">
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="action green" id="btnJalankan">▶ Jalankan</button>
+        <button class="action red" id="btnReset">↺ Reset</button>
+      </div>
+
+      <div class="hasil-grid">
+        <div class="hasil-item"><div class="label">Kecepatan (v)</div><div class="value" id="outV">10 m/s</div></div>
+        <div class="hasil-item"><div class="label">Waktu (t)</div><div class="value" id="outT">5 s</div></div>
+        <div class="hasil-item"><div class="label">Jarak (s)</div><div class="value" id="outS">50 m</div></div>
+        <div class="hasil-item"><div class="label">Percepatan (a)</div><div class="value" id="outA">0 m/s²</div></div>
+      </div>
+
+      <h3>Grafik Posisi–Waktu (s–t)</h3>
+      <div class="canvas-wrap"><canvas id="grafST"></canvas></div>
+      <h3>Grafik Kecepatan–Waktu (v–t)</h3>
+      <div class="canvas-wrap"><canvas id="grafVT"></canvas></div>
+    </section>
+
+    <!-- LATIHAN -->
+    <section id="latihan" class="section">
+      <h2>Latihan Soal</h2>
+      <p>Kerjakan soal berikut. Buka <b>Petunjuk</b> jika perlu. Klik <b>Cek Jawaban</b> untuk umpan balik.</p>
+      <div id="latihanContainer"></div>
+    </section>
+
+    <!-- EVALUASI -->
+    <section id="evaluasi" class="section">
+      <h2>Evaluasi</h2>
+      <p>Kerjakan semua soal. Indikator nomor berubah <span style="color:#1b8a5a;font-weight:700;">hijau</span> jika dijawab. Klik <b>Kirim Jawaban</b> untuk melihat hasil.</p>
+      <div class="progress-bar"><div id="progressEval"></div></div>
+      <div class="indikator-grid" id="indikatorGrid"></div>
+      <div id="evaluasiContainer"></div>
+      <div class="btns">
+        <button class="action green" id="btnKirimEval">📤 Kirim Jawaban</button>
+      </div>
+    </section>
+
+    <!-- HASIL -->
+    <section id="hasil" class="section">
+      <h2>Hasil Evaluasi</h2>
+      <div id="hasilContainer">
+        <div class="card" style="text-align:center;">
+          <p>Belum ada hasil. Silakan kerjakan <b>Evaluasi</b> terlebih dahulu.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ============ NAVIGASI ============ */
+const navButtons = document.querySelectorAll('#nav button');
+const sections = document.querySelectorAll('.section');
+navButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    navButtons.forEach(b => b.classList.remove('active'));
+    sections.forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.target).classList.add('active');
+    btn.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
+    if (btn.dataset.target === 'lab') { setTimeout(drawAll, 60); }
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+});
+
+/* ============ LAB VIRTUAL ============ */
+const vSlider = document.getElementById('vSlider');
+const tSlider = document.getElementById('tSlider');
+const vVal = document.getElementById('vVal');
+const tVal = document.getElementById('tVal');
+const outV = document.getElementById('outV');
+const outT = document.getElementById('outT');
+const outS = document.getElementById('outS');
+const outA = document.getElementById('outA');
+const mobil = document.getElementById('mobil');
+const labArea = document.getElementById('labArea');
+
+let animId = null;
+
+function getV(){ return parseInt(vSlider.value); }
+function getT(){ return parseInt(tSlider.value); }
+function getS(){ return getV() * getT(); }
+
+function updateHasil(){
+  outV.textContent = getV() + ' m/s';
+  outT.textContent = getT() + ' s';
+  outS.textContent = getS() + ' m';
+  outA.textContent = '0 m/s²';
+}
+
+/* UPDATE posisi mobil — sudah diperbaiki: clamp 0..1, reset dulu sebelum jalan */
+function updateMobilPosition(frac){
+  const areaW = labArea.clientWidth;
+  const mobilW = mobil.offsetWidth || 40;
+  const maxLeft = areaW - mobilW - 8;
+  const f = Math.max(0, Math.min(1, frac)); // clamp biar gak keluar area
+  mobil.style.left = (f * maxLeft + 4) + 'px';
+}
+
+// Slider berubah → update hasil + grafik + RESET posisi mobil ke awal (biar gak loncat)
+function onSliderChange(){
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+  updateHasil();
+  drawAll();
+  updateMobilPosition(0); // ✅ reset mobil ke kiri
+}
+
+vSlider.addEventListener('input', () => {
+  vVal.textContent = vSlider.value;
+  onSliderChange();
+});
+tSlider.addEventListener('input', () => {
+  tVal.textContent = tSlider.value;
+  onSliderChange();
+});
+
+/* Tombol Jalankan — diperbaiki: reset dulu, durasi proporsional, easing halus */
+document.getElementById('btnJalankan').addEventListener('click', () => {
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+
+  // 🔥 RESET ke posisi 0 dulu supaya tidak loncat/mundur
+  updateMobilPosition(0);
+
+  const v = getV();
+  const t = getT();
+  const s = getS();
+
+  // Skala visual: mobil bergerak 0 → 100% hanya kalau s = maxS (600 m)
+  // Mau selalu penuh? ganti fracTarget = 1;
+  const maxS = 30 * 20; // 600 m
+  const fracTarget = Math.min(s / maxS, 1);
+
+  // Durasi animasi proporsional dengan t (t sekon → t*150ms, min 800ms, max 4000ms)
+  const duration = Math.max(800, Math.min(4000, t * 150));
+  const start = performance.now();
+
+  function step(now){
+    let p = (now - start) / duration;
+    if (p > 1) p = 1;
+    // easeInOut biar mulus (perlahan → cepat → perlahan)
+    const eased = p < 0.5
+      ? 2 * p * p
+      : 1 - Math.pow(-2 * p + 2, 2) / 2;
+    updateMobilPosition(eased * fracTarget);
+    if (p < 1) {
+      animId = requestAnimationFrame(step);
+    } else {
+      animId = null;
+    }
+  }
+  animId = requestAnimationFrame(step);
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  if (animId) { cancelAnimationFrame(animId); animId = null; }
+  updateMobilPosition(0);
+  vSlider.value = 10; tSlider.value = 5;
+  vVal.textContent = 10; tVal.textContent = 5;
+  updateHasil(); drawAll();
+});
+
+/* ============ GRAFIK RESPONSIVE ============ */
+const grafST = document.getElementById('grafST');
+const grafVT = document.getElementById('grafVT');
+
+function fitCanvas(canvas){
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const cssW = Math.floor(rect.width);
+  const cssH = Math.max(180, Math.min(260, Math.round(cssW * 0.55)));
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, w: cssW, h: cssH };
+}
+
+function drawAxes(ctx, w, h, xLabel, yLabel, xMax, yMax, xStep, yStep){
+  ctx.clearRect(0, 0, w, h);
+  const pad = { l: w < 400 ? 34 : 44, r: 12, t: 14, b: 30 };
+  const gw = w - pad.l - pad.r;
+  const gh = h - pad.t - pad.b;
+  const fs = w < 400 ? 10 : 11;
+
+  ctx.strokeStyle = '#e3eaf2';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= xMax; x += xStep){
+    const px = pad.l + (x / xMax) * gw;
+    ctx.beginPath(); ctx.moveTo(px, pad.t); ctx.lineTo(px, pad.t + gh); ctx.stroke();
+  }
+  for (let y = 0; y <= yMax; y += yStep){
+    const py = pad.t + gh - (y / yMax) * gh;
+    ctx.beginPath(); ctx.moveTo(pad.l, py); ctx.lineTo(pad.l + gw, py); ctx.stroke();
+  }
+
+  ctx.strokeStyle = '#2c5364';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t);
+  ctx.lineTo(pad.l, pad.t + gh);
+  ctx.lineTo(pad.l + gw, pad.t + gh);
+  ctx.stroke();
+
+  ctx.fillStyle = '#2c5364';
+  ctx.font = fs + 'px Segoe UI';
+  ctx.textAlign = 'center';
+  for (let x = 0; x <= xMax; x += xStep){
+    const px = pad.l + (x / xMax) * gw;
+    ctx.fillText(x, px, pad.t + gh + fs + 3);
+  }
+  ctx.textAlign = 'right';
+  for (let y = 0; y <= yMax; y += yStep){
+    const py = pad.t + gh - (y / yMax) * gh;
+    ctx.fillText(y, pad.l - 4, py + 3);
+  }
+
+  ctx.textAlign = 'center';
+  ctx.font = 'bold ' + fs + 'px Segoe UI';
+  ctx.fillText(xLabel, pad.l + gw / 2, h - 3);
+  ctx.save();
+  ctx.translate(9, pad.t + gh / 2);
+  ctx.rotate(-Math.PI / 2);
+  ctx.fillText(yLabel, 0, 0);
+  ctx.restore();
+
+  return { pad, gw, gh };
+}
+
+function drawST(){
+  const { ctx, w, h } = fitCanvas(grafST);
+  const v = getV(), t = getT();
+  const xMax = 20, yMax = 600;
+  const { pad, gw, gh } = drawAxes(ctx, w, h, 'Waktu t (s)', 'Posisi s (m)', xMax, yMax, 4, 100);
+
+  ctx.strokeStyle = '#1b8a5a';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  for (let tt = 0; tt <= t; tt += 0.2){
+    const ss = v * tt;
+    const px = pad.l + (tt / xMax) * gw;
+    const py = pad.t + gh - (ss / yMax) * gh;
+    if (tt === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+
+  const px = pad.l + (t / xMax) * gw;
+  const py = pad.t + gh - ((v * t) / yMax) * gh;
+  ctx.fillStyle = '#b03030';
+  ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#b03030';
+  ctx.font = 'bold 11px Segoe UI';
+  ctx.textAlign = 'left';
+  const labelX = px + 8 > w - 60 ? px - 70 : px + 8;
+  ctx.fillText('(' + t + 's, ' + (v * t) + 'm)', labelX, py - 6);
+}
+
+function drawVT(){
+  const { ctx, w, h } = fitCanvas(grafVT);
+  const v = getV(), t = getT();
+  const xMax = 20, yMax = 30;
+  const { pad, gw, gh } = drawAxes(ctx, w, h, 'Waktu t (s)', 'Kecepatan v (m/s)', xMax, yMax, 4, 5);
+
+  ctx.strokeStyle = '#1e3c72';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  const py = pad.t + gh - (v / yMax) * gh;
+  ctx.moveTo(pad.l, py);
+  ctx.lineTo(pad.l + (t / xMax) * gw, py);
+  ctx.stroke();
+
+  const px = pad.l + (t / xMax) * gw;
+  ctx.fillStyle = '#b03030';
+  ctx.beginPath(); ctx.arc(px, py, 5, 0, Math.PI * 2); ctx.fill();
+
+  ctx.fillStyle = '#b03030';
+  ctx.font = 'bold 11px Segoe UI';
+  ctx.textAlign = 'left';
+  ctx.fillText('v = ' + v + ' m/s (konstan)', pad.l + 8, py - 8);
+}
+
+function drawAll(){ drawST(); drawVT(); }
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (document.getElementById('lab').classList.contains('active')) drawAll();
+  }, 150);
+});
+
+/* ============ LATIHAN ============ */
+const latihanData = [
+  {
+    q: "Sebuah sepeda bergerak lurus dengan kecepatan tetap 6 m/s selama 10 sekon. Berapa jarak yang ditempuh?",
+    opsi: ["16 m", "60 m", "0,6 m", "600 m"],
+    benar: 1,
+    petunjuk: "Gunakan rumus s = v · t. Substitusikan v = 6 m/s dan t = 10 s.",
+    alasan: "s = v · t = 6 m/s × 10 s = 60 m. Jawaban yang benar 60 m."
+  },
+  {
+    q: "Seorang pelari menempuh jarak 200 m dalam waktu 25 sekon. Kecepatan pelari tersebut adalah ...",
+    opsi: ["5 m/s", "8 m/s", "10 m/s", "12 m/s"],
+    benar: 1,
+    petunjuk: "v = s / t. Bagi jarak dengan waktu.",
+    alasan: "v = 200 m / 25 s = 8 m/s. Jadi kecepatannya 8 m/s."
+  },
+  {
+    q: "Mobil bergerak GLB dengan kecepatan 15 m/s. Waktu yang diperlukan untuk menempuh 90 m adalah ...",
+    opsi: ["4 s", "5 s", "6 s", "7 s"],
+    benar: 2,
+    petunjuk: "t = s / v. Bagi jarak dengan kecepatan.",
+    alasan: "t = 90 m / 15 m/s = 6 s. Jadi waktu yang diperlukan 6 sekon."
+  },
+  {
+    q: "Grafik kecepatan terhadap waktu (v–t) untuk benda yang bergerak GLB berbentuk ...",
+    opsi: ["Garis miring ke atas", "Garis horizontal", "Garis miring ke bawah", "Parabola"],
+    benar: 1,
+    petunjuk: "Pada GLB, kecepatan selalu tetap (konstan) terhadap waktu.",
+    alasan: "Karena v konstan, grafik v–t berupa garis horizontal (lurus mendatar)."
+  }
+];
+
+const latihanContainer = document.getElementById('latihanContainer');
+latihanData.forEach((item, idx) => {
+  const div = document.createElement('div');
+  div.className = 'soal';
+  div.innerHTML =
+    '<div class="pertanyaan">' + (idx + 1) + '. ' + item.q + '</div>' +
+    '<div class="opsi">' +
+      item.opsi.map((o, i) =>
+        '<label><input type="radio" name="lat' + idx + '" value="' + i + '"> ' +
+        String.fromCharCode(65 + i) + '. ' + o + '</label>'
+      ).join('') +
+    '</div>' +
+    '<button class="petunjuk-btn" data-idx="' + idx + '">💡 Petunjuk</button>' +
+    '<div class="petunjuk" id="petunjuk' + idx + '">' + item.petunjuk + '</div>' +
+    '<button class="action" style="margin-top:10px;" data-cek="' + idx + '">Cek Jawaban</button>' +
+    '<div class="feedback" id="fb' + idx + '"></div>';
+  latihanContainer.appendChild(div);
+});
+
+latihanContainer.addEventListener('click', (e) => {
+  if (e.target.classList.contains('petunjuk-btn')){
+    const idx = e.target.dataset.idx;
+    const el = document.getElementById('petunjuk' + idx);
+    el.style.display = el.style.display === 'block' ? 'none' : 'block';
+  }
+  if (e.target.dataset.cek !== undefined){
+    const idx = parseInt(e.target.dataset.cek);
+    const selected = document.querySelector('input[name="lat' + idx + '"]:checked');
+    const fb = document.getElementById('fb' + idx);
+    fb.style.display = 'block';
+    if (!selected){
+      fb.className = 'feedback salah';
+      fb.innerHTML = '<b>⚠ Belum memilih jawaban.</b> Silakan pilih salah satu opsi terlebih dahulu.';
+      return;
+    }
+    const val = parseInt(selected.value);
+    const item = latihanData[idx];
+    if (val === item.benar){
+      fb.className = 'feedback benar';
+      fb.innerHTML = '<b>✅ Benar!</b> ' + item.alasan;
+    } else {
+      fb.className = 'feedback salah';
+      fb.innerHTML = '<b>❌ Belum tepat.</b> Jawaban yang benar adalah <b>' +
+        String.fromCharCode(65 + item.benar) + '. ' + item.opsi[item.benar] + '</b>.<br>' + item.alasan;
+    }
+  }
+});
+
+/* ============ EVALUASI ============ */
+const evalData = [
+  {
+    q: "Ciri utama Gerak Lurus Beraturan (GLB) adalah ...",
+    opsi: ["Kecepatan berubah teratur", "Percepatan tetap", "Kecepatan konstan dan lintasan lurus", "Percepatan nol dan lintasan melingkar"],
+    benar: 2,
+    tp: 1,
+    alasan: "GLB memiliki kecepatan konstan pada lintasan lurus, sehingga percepatannya nol."
+  },
+  {
+    q: "Persamaan yang benar untuk GLB adalah ...",
+    opsi: ["s = v / t", "v = s · t", "s = v · t", "t = v · s"],
+    benar: 2,
+    tp: 2,
+    alasan: "Jarak = kecepatan × waktu, sehingga s = v · t."
+  },
+  {
+    q: "Satuan SI untuk kecepatan adalah ...",
+    opsi: ["km/jam", "m/s", "m/s²", "sekon"],
+    benar: 1,
+    tp: 2,
+    alasan: "Satuan SI kecepatan adalah meter per sekon (m/s)."
+  },
+  {
+    q: "Bus bergerak GLB dengan v = 72 km/jam. Kecepatan bus dalam m/s adalah ...",
+    opsi: ["15 m/s", "20 m/s", "25 m/s", "30 m/s"],
+    benar: 1,
+    tp: 3,
+    alasan: "72 km/jam ÷ 3,6 = 20 m/s."
+  },
+  {
+    q: "Mobil bergerak GLB dengan v = 25 m/s selama 8 s. Jarak yang ditempuh adalah ...",
+    opsi: ["100 m", "150 m", "200 m", "250 m"],
+    benar: 2,
+    tp: 3,
+    alasan: "s = v · t = 25 m/s × 8 s = 200 m."
+  },
+  {
+    q: "Grafik posisi–waktu (s–t) untuk GLB berbentuk ...",
+    opsi: ["Garis horizontal", "Garis lurus miring", "Parabola", "Kurva eksponensial"],
+    benar: 1,
+    tp: 4,
+    alasan: "Karena s = v·t (linear terhadap t), grafik s–t berupa garis lurus miring dengan kemiringan = kecepatan."
+  }
+];
+
+const evalContainer = document.getElementById('evaluasiContainer');
+const indikatorGrid = document.getElementById('indikatorGrid');
+const progressEval = document.getElementById('progressEval');
+let evalAnswers = new Array(evalData.length).fill(null);
+
+evalData.forEach((item, idx) => {
+  const d = document.createElement('div');
+  d.className = 'indikator pending';
+  d.id = 'ind' + idx;
+  d.textContent = 'Soal ' + (idx + 1) + ' (TP' + item.tp + ')';
+  indikatorGrid.appendChild(d);
+});
+
+evalData.forEach((item, idx) => {
+  const div = document.createElement('div');
+  div.className = 'soal';
+  div.innerHTML =
+    '<div class="pertanyaan">' + (idx + 1) + '. ' + item.q +
+    ' <span style="font-size:0.75rem;color:#888;">(TP' + item.tp + ')</span></div>' +
+    '<div class="opsi">' +
+      item.opsi.map((o, i) =>
+        '<label><input type="radio" name="eval' + idx + '" value="' + i + '"> ' +
+        String.fromCharCode(65 + i) + '. ' + o + '</label>'
+      ).join('') +
+    '</div>';
+  evalContainer.appendChild(div);
+});
+
+evalContainer.addEventListener('change', (e) => {
+  const name = e.target.name;
+  if (!name) return;
+  const idx = parseInt(name.replace('eval', ''));
+  evalAnswers[idx] = parseInt(e.target.value);
+  updateIndikator();
+});
+
+function updateIndikator(){
+  let answered = 0;
+  evalAnswers.forEach((a, idx) => {
+    const el = document.getElementById('ind' + idx);
+    if (a !== null){
+      el.className = 'indikator done';
+      answered++;
+    } else {
+      el.className = 'indikator pending';
+    }
+  });
+  progressEval.style.width = (answered / evalData.length * 100) + '%';
+}
+
+document.getElementById('btnKirimEval').addEventListener('click', () => {
+  let benar = 0;
+  evalData.forEach((item, idx) => {
+    if (evalAnswers[idx] === item.benar) benar++;
+  });
+  const skor = Math.round(benar / evalData.length * 100);
+
+  const hasilContainer = document.getElementById('hasilContainer');
+  let kelas = 'big';
+  let predikat = '';
+  if (skor >= 80){ kelas = 'big'; predikat = '🌟 Sangat Baik'; }
+  else if (skor >= 60){ kelas = 'big cukup'; predikat = '👍 Cukup'; }
+  else { kelas = 'big buruk'; predikat = '💪 Perlu Belajar Lagi'; }
+
+  const rincian = evalData.map((item, idx) => {
+    const jawab = evalAnswers[idx];
+    const benarFlag = jawab === item.benar;
+    const jawabTxt = jawab === null ? 'Tidak dijawab' :
+      String.fromCharCode(65 + jawab) + '. ' + item.opsi[jawab];
+    return '<div class="card" style="border-left:5px solid ' +
+      (benarFlag ? '#1b8a5a' : '#b03030') + ';">' +
+      '<b>Soal ' + (idx + 1) + ' (TP' + item.tp + ') — ' +
+      (benarFlag ? '✅ Benar' : '❌ Salah') + '</b>' +
+      '<p style="margin-top:6px;">Jawabanmu: ' + jawabTxt + '</p>' +
+      '<p>Jawaban benar: ' + String.fromCharCode(65 + item.benar) + '. ' +
+      item.opsi[item.benar] + '</p>' +
+      '<p style="margin-top:4px; font-size:0.9rem; color:#555;"><i>' +
+      item.alasan + '</i></p></div>';
+  }).join('');
+
+  hasilContainer.innerHTML =
+    '<div class="card skor-box">' +
+      '<div class="' + kelas + '">' + skor + '</div>' +
+      '<p style="font-size:1.1rem; font-weight:700;">' + predikat + '</p>' +
+      '<p>Benar ' + benar + ' dari ' + evalData.length + ' soal</p>' +
+    '</div>' +
+    '<h3>Indikator Ketercapaian</h3>' +
+    '<div class="indikator-grid">' +
+      evalData.map((item, idx) => {
+        const ok = evalAnswers[idx] === item.benar;
+        return '<div class="indikator ' + (ok ? 'done' : 'pending') + '">' +
+          'Soal ' + (idx + 1) + ' (TP' + item.tp + ') — ' +
+          (ok ? 'Tercapai' : 'Belum') + '</div>';
+      }).join('') +
+    '</div>' +
+    '<h3>Pembahasan</h3>' + rincian;
+
+  navButtons.forEach(b => b.classList.remove('active'));
+  sections.forEach(s => s.classList.remove('active'));
+  document.querySelector('[data-target="hasil"]').classList.add('active');
+  document.getElementById('hasil').classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+/* ============ INIT ============ */
+window.addEventListener('load', () => {
+  updateHasil();
+  updateMobilPosition(0);
+  setTimeout(drawAll, 100);
+  updateIndikator();
+});
+</script>
+</body>
+</html>
